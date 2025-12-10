@@ -121,4 +121,59 @@ router.get('/user/:email', async (req, res) => {
   }
 });
 
+// PUT /api/auth/user/:email
+router.put('/user/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const { fullName, phone, address, currentPassword, newPassword, profilePicture } = req.body;
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // If updating password, verify current password
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required to update password.' });
+      }
+
+      const isPasswordMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isPasswordMatch) {
+        return res.status(400).json({ message: 'Current password is incorrect.' });
+      }
+
+      // Hash new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      user.password = hashedPassword;
+    }
+
+    // Update profile fields
+    if (fullName) user.fullName = fullName;
+    if (phone) user.phone = phone;
+    if (address) user.address = address;
+    
+    // Update profile picture (accepts base64 or URL)
+    if (profilePicture) {
+      // Validate that it's a valid base64 or URL
+      if (profilePicture.startsWith('data:image/') || profilePicture.startsWith('http')) {
+        user.profilePicture = profilePicture;
+      } else {
+        return res.status(400).json({ message: 'Invalid profile picture format.' });
+      }
+    }
+
+    await user.save();
+
+    // Return updated user data (excluding password)
+    const { password, ...userData } = user.toObject();
+    res.json({ message: 'User updated successfully', user: userData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router;

@@ -161,6 +161,22 @@ export const en = {
   password_hint: "Must be at least 8 characters long",
   confirm_password_hint: "Re-enter your password for confirmation",
   registered_successfully: "Registered successfully",
-  something_went_wrong: "Something went wrong"
+  something_went_wrong: "Something went wrong",
+  login_success: "Login Successful",
+
+  // Dashboard & Auth
+  go_to_dashboard: "Go to Dashboard",
+  logout: "Logout",
+  confirm_logout: "Confirm Logout",
+  logout_message: "Are you sure you want to logout? You will need to login again to access your dashboard.",
+  cancel: "Cancel",
+  logged_out_successfully: "Logged out successfully",
+  please_login_dashboard: "Please login to access the dashboard",
+
+  // Toast notifications
+  toast_success_title: "Success",
+  toast_error_title: "Error",
+  toast_info_title: "Info",
+  toast_warning_title: "Warning"
 
 };

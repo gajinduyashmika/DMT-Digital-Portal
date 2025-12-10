@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import {
   Home,
   PlusCircle,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { cn } from '../lib/utils';
+import logo from '../assets/corner_logo.png';
 
 const translations = {
   en: {
@@ -44,30 +45,47 @@ const translations = {
   },
 };
 
+
+type TranslationKey = keyof typeof translations.en;
+
 const navItems = [
-  { icon: Home, label: 'dashboard', path: '/dashboard' },
-  { icon: PlusCircle, label: 'addVehicle', path: '/add-vehicle' },
-  { icon: Car, label: 'myVehicles', path: '/my-vehicles' },
-  { icon: RefreshCw, label: 'transfer', path: '/transfer' },
-  { icon: Inbox, label: 'status', path: '/status' },
-  { icon: Settings, label: 'settings', path: '/settings' },
+  { icon: Home, label: 'dashboard' as TranslationKey, path: '/dashboard' },
+  { icon: PlusCircle, label: 'addVehicle' as TranslationKey, path: '/add-vehicle' },
+  { icon: Car, label: 'myVehicles' as TranslationKey, path: '/my-vehicles' },
+  { icon: RefreshCw, label: 'transfer' as TranslationKey, path: '/transfer' },
+  { icon: Inbox, label: 'status' as TranslationKey, path: '/status' },
+  { icon: Settings, label: 'settings' as TranslationKey, path: '/settings' },
 ];
 
 export const Sidebar = () => {
-  const { isCollapsed, setCollapsed, language, isDarkMode } = useStore();
+  const { isCollapsed, setCollapsed, language } = useStore();
+  const lang = (language as keyof typeof translations) ?? 'en';
 
   return (
     <div
       className={cn(
-        'flex h-screen flex-col justify-between bg-red-900 text-white transition-all duration-300',
+        'flex h-screen flex-col justify-between bg-red-900 text-white transition-all duration-300 sticky top-0 self-start overflow-hidden',
         isCollapsed ? 'w-16' : 'w-64'
       )}
     >
       <div>
         <div className="flex items-center justify-between p-4">
-          <h2 className={cn('font-bold', isCollapsed ? 'hidden' : 'block')}>
-            DMT Dashboard
-          </h2>
+          <div className="flex items-center gap-3">
+            <Link to="/" className="shrink-0" aria-label="Go to home">
+              <img
+                src={logo}
+                alt="DMT Home"
+                className={cn(
+                  'rounded-full border',
+                  isCollapsed ? 'h-7 w-7' : 'h-10 w-10'
+                )}
+              />
+            </Link>
+            <h2 className={cn('font-bold', isCollapsed ? 'hidden' : 'block')}>
+              DMT Dashboard
+            </h2>
+            
+          </div>
           <button
             onClick={() => setCollapsed(!isCollapsed)}
             className="rounded-lg p-1.5 hover:bg-red-950"
@@ -96,7 +114,7 @@ export const Sidebar = () => {
             >
               <Icon size={20} />
               {!isCollapsed && (
-                <span className="text-sm">{translations[language][label]}</span>
+                <span className="text-sm">{translations[lang][label]}</span>
               )}
             </NavLink>
           ))}
@@ -113,7 +131,7 @@ export const Sidebar = () => {
         >
           <LogOut size={20} />
           {!isCollapsed && (
-            <span className="text-sm">{translations[language].logout}</span>
+            <span className="text-sm">{translations[lang].logout}</span>
           )}
         </NavLink>
       </div>

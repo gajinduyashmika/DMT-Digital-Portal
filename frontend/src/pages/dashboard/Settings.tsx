@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
-import toast from 'react-hot-toast';
+import axios from 'axios';
+import { useToast } from '../../components/ToastContainer';
 import {
   User,
   Mail,
-  Phone,
   Lock,
   Bell,
-  Shield,
   LogOut,
   Smartphone,
-  Globe,
   Upload,
   Trash,
   Eye,
@@ -31,6 +29,8 @@ const translations = {
       name: 'Full Name',
       email: 'Email Address',
       phone: 'Phone Number',
+      nationalId: 'National ID',
+      address: 'Address',
       currentPassword: 'Current Password',
       newPassword: 'New Password',
       confirmPassword: 'Confirm Password',
@@ -61,6 +61,8 @@ const translations = {
       name: 'සම්පූර්ණ නම',
       email: 'විද්‍යුත් තැපෑල',
       phone: 'දුරකථන අංකය',
+      nationalId: 'ජාතික හැඳුනුම්පත්',
+      address: 'ලිපිනය',
       currentPassword: 'වර්තමාන මුරපදය',
       newPassword: 'නව මුරපදය',
       confirmPassword: 'මුරපදය තහවුරු කරන්න',
@@ -91,6 +93,8 @@ const translations = {
       name: 'முழு பெயர்',
       email: 'மின்னஞ்சல் முகவரி',
       phone: 'தொலைபேசி எண்',
+      nationalId: 'தேசிய அடையாள எண்',
+      address: 'முகவரி',
       currentPassword: 'தற்போதைய கடவுச்சொல்',
       newPassword: 'புதிய கடவுச்சொல்',
       confirmPassword: 'கடவுச்சொல்லை உறுதிப்படுத்தவும்',
@@ -111,12 +115,6 @@ const translations = {
   },
 };
 
-const languages = [
-  { code: 'en', label: 'English' },
-  { code: 'si', label: 'සිංහල' },
-  { code: 'ta', label: 'தமிழ்' },
-];
-
 const loginActivity = [
   {
     id: 1,
@@ -134,39 +132,100 @@ const loginActivity = [
   },
 ];
 
-const currentUser = {
-  name: 'Mohomed Paramee',
-  email: 'paramee@example.com',
-  phone: '+94 77 123 4567',
-  profileImage: 'https://bsmedia.business-standard.com/_media/bs/img/about-page/thumb/464_464/1649933026.jpg',
-};
-
 export const Settings = () => {
-  const { language, setLanguage, isDarkMode } = useStore();
+  const { language, isDarkMode } = useStore();
+  const { showToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: true,
     system: true,
   });
-  
+
   const [formData, setFormData] = useState({
-    name: currentUser.name,
-    email: currentUser.email,
-    phone: currentUser.phone,
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    nationalId: '',
   });
-  
+
+  const [originalData, setOriginalData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    nationalId: '',
+    profilePicture: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg',
+  });
+
   const [isModified, setIsModified] = useState({
     profile: false,
     password: false,
   });
-  
-  const [profileImage, setProfileImage] = useState<string>(currentUser.profileImage);
+
+  const [profileImage, setProfileImage] = useState<string>(
+    'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'
+  );
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
+
+  // Fetch user data from MongoDB on component mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const storedEmail = localStorage.getItem('userEmail');
+        if (!storedEmail) {
+          showToast('error', 'User email not found. Please login again.');
+          setLoading(false);
+          return;
+        }
+
+        setUserEmail(storedEmail);
+        const userRes = await axios.get(`http://localhost:5000/api/auth/user/${storedEmail}`);
+        const userData = userRes.data;
+
+        setFormData({
+          fullName: userData.fullName || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          address: userData.address || '',
+          nationalId: userData.nationalId || '',
+        });
+
+        setOriginalData({
+          fullName: userData.fullName || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+          address: userData.address || '',
+          nationalId: userData.nationalId || '',
+          profilePicture: userData.profilePicture || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg',
+        });
+
+        if (
+          userData.profilePicture &&
+          userData.profilePicture !== 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'
+        ) {
+          setProfileImage(userData.profilePicture);
+        }
+
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        showToast('error', 'Failed to load user data');
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [showToast, isDarkMode]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -188,68 +247,132 @@ export const Settings = () => {
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('error', 'Image size must be less than 2MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showToast('error', 'Please upload a valid image file');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = () => {
         setProfileImage(reader.result as string);
         setIsModified(prev => ({ ...prev, profile: true }));
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleProfileUpdate = () => {
-    toast.success('Profile updated successfully!', {
-      icon: '✅',
-      style: {
-        borderRadius: '10px',
-        background: isDarkMode ? '#1F2937' : '#fff',
-        color: isDarkMode ? '#fff' : '#000',
-      },
-    });
-    setIsModified(prev => ({ ...prev, profile: false }));
+  const handleProfileUpdate = async () => {
+    try {
+      if (!userEmail) {
+        showToast('error', 'User email not found');
+        return;
+      }
+
+      setUpdating(true);
+      const updateData: any = {
+        fullName: formData.fullName,
+        phone: formData.phone,
+        address: formData.address,
+      };
+
+      // Check if profile picture has changed
+      if (profileImage && profileImage !== (originalData.profilePicture || 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg')) {
+        updateData.profilePicture = profileImage;
+      }
+
+      await axios.put(`http://localhost:5000/api/auth/user/${userEmail}`, updateData);
+
+      showToast('success', 'Profile updated successfully!');
+      setOriginalData({
+        ...formData,
+        profilePicture: profileImage,
+      });
+      setIsModified(prev => ({ ...prev, profile: false }));
+    } catch (err: any) {
+      console.error('Error updating profile:', err);
+      showToast('error', err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setUpdating(false);
+    }
   };
 
-  const handlePasswordUpdate = () => {
+  const handlePasswordUpdate = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('New passwords do not match!', {
-        icon: '❌',
-        style: {
-          borderRadius: '10px',
-          background: isDarkMode ? '#1F2937' : '#fff',
-          color: isDarkMode ? '#fff' : '#000',
-        },
-      });
+      showToast('error', 'New passwords do not match!');
       return;
     }
-    
-    toast.success('Password updated successfully!', {
-      icon: '✅',
-      style: {
-        borderRadius: '10px',
-        background: isDarkMode ? '#1F2937' : '#fff',
-        color: isDarkMode ? '#fff' : '#000',
-      },
-    });
-    
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setIsModified(prev => ({ ...prev, password: false }));
+
+    if (passwordData.newPassword.length < 8) {
+      showToast('warning', 'Password must be at least 8 characters');
+      return;
+    }
+
+    try {
+      if (!userEmail) {
+        showToast('error', 'User email not found');
+        return;
+      }
+
+      setUpdating(true);
+      await axios.put(`http://localhost:5000/api/auth/user/${userEmail}`, {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      showToast('success', 'Password updated successfully!');
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setIsModified(prev => ({ ...prev, password: false }));
+    } catch (err: any) {
+      console.error('Error updating password:', err);
+      showToast('error', err.response?.data?.message || 'Failed to update password');
+    } finally {
+      setUpdating(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-red-600 mx-auto"></div>
+          <p>Loading user data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       {/* Profile Settings */}
       <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold">
-            {translations[language].sections.profile}
-          </h2>
+          <h2 className="text-xl font-semibold">{translations[language].sections.profile}</h2>
           {isModified.profile && (
             <button
               onClick={handleProfileUpdate}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              disabled={updating}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Save className="h-4 w-4" />
-              <span>{translations[language].buttons.save}</span>
+              {updating ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  <span>{translations[language].buttons.save}</span>
+                </>
+              )}
             </button>
           )}
         </div>
@@ -263,9 +386,11 @@ export const Settings = () => {
                 className="h-full w-full rounded-full object-cover"
               />
             ) : (
-              <div className={`flex h-full w-full items-center justify-center rounded-full ${
-                isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
-              }`}>
+              <div
+                className={`flex h-full w-full items-center justify-center rounded-full ${
+                  isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
+                }`}
+              >
                 <User className="h-12 w-12 text-gray-400" />
               </div>
             )}
@@ -279,10 +404,10 @@ export const Settings = () => {
               <Upload className="h-4 w-4" />
             </label>
           </div>
-          {profileImage && profileImage !== currentUser.profileImage && (
+          {profileImage && (
             <button
               onClick={() => {
-                setProfileImage(currentUser.profileImage);
+                setProfileImage('https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg');
                 setIsModified(prev => ({ ...prev, profile: true }));
               }}
               className="flex items-center gap-2 text-red-600 hover:text-red-700"
@@ -295,102 +420,88 @@ export const Settings = () => {
 
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              {translations[language].fields.name}
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`w-full rounded-lg border pl-10 pr-4 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
-                }`}
-              />
-              <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            </div>
+            <label className="mb-2 block text-sm font-medium">{translations[language].fields.name}</label>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              className={`w-full rounded-lg border px-4 py-2 ${
+                isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
+              }`}
+            />
           </div>
-
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              {translations[language].fields.email}
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full rounded-lg border pl-10 pr-4 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
-                }`}
-              />
-              <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            </div>
+            <label className="mb-2 block text-sm font-medium">{translations[language].fields.email}</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              disabled
+              className={`w-full rounded-lg border px-4 py-2 opacity-60 ${
+                isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
+              }`}
+            />
           </div>
-
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              {translations[language].fields.phone}
-            </label>
-            <div className="relative">
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className={`w-full rounded-lg border pl-10 pr-4 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
-                }`}
-              />
-              <Phone className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            </div>
+            <label className="mb-2 block text-sm font-medium">{translations[language].fields.phone}</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className={`w-full rounded-lg border px-4 py-2 ${
+                isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
+              }`}
+            />
           </div>
-
           <div>
-            <label className="mb-2 block text-sm font-medium">
-              {translations[language].fields.language}
-            </label>
-            <div className="relative">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as any)}
-                className={`w-full appearance-none rounded-lg border pl-10 pr-4 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
-                }`}
-              >
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.label}
-                  </option>
-                ))}
-              </select>
-              <Globe className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            </div>
+            <label className="mb-2 block text-sm font-medium">{translations[language].fields.nationalId}</label>
+            <input
+              type="text"
+              name="nationalId"
+              value={formData.nationalId}
+              disabled
+              className={`w-full rounded-lg border px-4 py-2 opacity-60 ${
+                isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
+              }`}
+            />
           </div>
         </div>
 
         <div className="mt-6">
+          <label className="mb-2 block text-sm font-medium">{translations[language].fields.address}</label>
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className={`w-full rounded-lg border px-4 py-2 ${
+              isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
+            }`}
+          />
+        </div>
+
+        <div className="mt-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-medium">
-              {translations[language].buttons.changePassword}
-            </h3>
+            <h3 className="text-lg font-medium">{translations[language].buttons.changePassword}</h3>
             {isModified.password && (
               <button
                 onClick={handlePasswordUpdate}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                disabled={updating}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Save className="h-4 w-4" />
-                <span>{translations[language].buttons.save}</span>
+                {updating ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    <span>{translations[language].buttons.save}</span>
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -403,9 +514,7 @@ export const Settings = () => {
                 onChange={handlePasswordChange}
                 placeholder={translations[language].fields.currentPassword}
                 className={`w-full rounded-lg border pl-10 pr-10 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
+                  isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
                 }`}
               />
               <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -428,9 +537,7 @@ export const Settings = () => {
                 onChange={handlePasswordChange}
                 placeholder={translations[language].fields.newPassword}
                 className={`w-full rounded-lg border pl-10 pr-10 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
+                  isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
                 }`}
               />
               <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -443,9 +550,7 @@ export const Settings = () => {
                 onChange={handlePasswordChange}
                 placeholder={translations[language].fields.confirmPassword}
                 className={`w-full rounded-lg border pl-10 pr-10 py-2 ${
-                  isDarkMode
-                    ? 'border-gray-600 bg-gray-700'
-                    : 'border-gray-300 bg-white'
+                  isDarkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-white'
                 }`}
               />
               <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -456,9 +561,7 @@ export const Settings = () => {
 
       {/* Notification Settings */}
       <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <h2 className="mb-6 text-xl font-semibold">
-          {translations[language].sections.notifications}
-        </h2>
+        <h2 className="mb-6 text-xl font-semibold">{translations[language].sections.notifications}</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -469,9 +572,7 @@ export const Settings = () => {
               <input
                 type="checkbox"
                 checked={notifications.email}
-                onChange={(e) =>
-                  setNotifications({ ...notifications, email: e.target.checked })
-                }
+                onChange={(e) => setNotifications({ ...notifications, email: e.target.checked })}
                 className="peer sr-only"
               />
               <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300"></div>
@@ -486,9 +587,7 @@ export const Settings = () => {
               <input
                 type="checkbox"
                 checked={notifications.sms}
-                onChange={(e) =>
-                  setNotifications({ ...notifications, sms: e.target.checked })
-                }
+                onChange={(e) => setNotifications({ ...notifications, sms: e.target.checked })}
                 className="peer sr-only"
               />
               <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300"></div>
@@ -503,9 +602,7 @@ export const Settings = () => {
               <input
                 type="checkbox"
                 checked={notifications.system}
-                onChange={(e) =>
-                  setNotifications({ ...notifications, system: e.target.checked })
-                }
+                onChange={(e) => setNotifications({ ...notifications, system: e.target.checked })}
                 className="peer sr-only"
               />
               <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-red-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300"></div>
@@ -516,9 +613,7 @@ export const Settings = () => {
 
       {/* Login Activity */}
       <div className={`rounded-lg p-6 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
-        <h2 className="mb-6 text-xl font-semibold">
-          {translations[language].sections.activity}
-        </h2>
+        <h2 className="mb-6 text-xl font-semibold">{translations[language].sections.activity}</h2>
         <div className="space-y-4">
           {loginActivity.map((activity) => (
             <div

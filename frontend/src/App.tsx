@@ -1,7 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import './i18n/i18n'; // If needed for internationalization
+import { ToastProvider } from './components/ToastContainer';
 
 // Import Layouts and Components
 import { Footer } from './components/Footer';
@@ -16,6 +17,8 @@ import { Home } from './pages/landing/Home';
 import { AboutUs } from './pages/landing/AboutUs';
 import { PrivacyPolicy } from './pages/landing/PrivacyPolicy';
 import { Support } from './pages/landing/Support';
+import { VehicleSearch } from './pages/landing/VehicleSearch';
+import { VehicleInfo } from './pages/landing/VehicleInfo';
 import { Login } from './pages/auth/Login';
 import { Register } from './pages/auth/Register';
 import { Dashboard } from './pages/dashboard/Dashboard';
@@ -29,14 +32,15 @@ import { NotFound } from './pages/landing/NotFound';
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col">
-        <Toaster 
-          position="top-right" 
-          toastOptions={{
-            duration: 3000,
-          }} 
-        />
+    <ToastProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col">
+          <Toaster 
+            position="top-right" 
+            toastOptions={{
+              duration: 3000,
+            }} 
+          />
 
         {/* Main Route Layout */}
         <Routes>
@@ -62,6 +66,8 @@ const App: React.FC = () => {
             <Route path="/about" element={<AboutUs />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/check-details" element={<VehicleSearch />} />
+            <Route path="/vehicleinfo/:regNumber" element={<VehicleInfo />} />
           </Route>
 
           {/* Catch-all for Not Found */}
@@ -69,6 +75,7 @@ const App: React.FC = () => {
         </Routes>
       </div>
     </Router>
+    </ToastProvider>
   );
 }
 
@@ -76,6 +83,15 @@ export default App;
 
 // Dashboard Layout
 const DashboardLayout: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/');
+    }
+  }, [navigate]);
+
   return (
     <div className="flex">
       <Sidebar />
@@ -125,6 +141,8 @@ const LandingLayout: React.FC = () => {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/check-details" element={<VehicleSearch />} />
+          <Route path="/vehicleinfo/:regNumber" element={<VehicleInfo />} />
         </Routes>
       </main>
       <Footer />

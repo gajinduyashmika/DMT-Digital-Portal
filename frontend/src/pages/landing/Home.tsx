@@ -1,9 +1,17 @@
 import { Clock, Lock, QrCode } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export const Home = () => {
   const { t } = useTranslation();
+  const [isAuthed, setIsAuthed] = useState<boolean>(!!localStorage.getItem('token'));
+
+  useEffect(() => {
+    const onStorage = () => setIsAuthed(!!localStorage.getItem('token'));
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   return (
     <>
@@ -14,10 +22,10 @@ export const Home = () => {
           <p className="text-xl opacity-90 mb-8">{t('hero_subtitle')}</p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <Link
-              to="/register"
+              to={isAuthed ? "/dashboard" : "/register"}
               className="px-6 py-3 text-xl rounded-full bg-red-700 text-white hover:bg-red-800 transition-colors"
             >
-              {t('register_now')}
+              {isAuthed ? t('go_to_dashboard') : t('register_now')}
             </Link>
             <Link
               to="/check-details"

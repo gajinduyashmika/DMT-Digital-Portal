@@ -3,7 +3,7 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import toast from 'react-hot-toast';
+import { useToast } from '../../components/ToastContainer';
 import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
 
@@ -19,6 +19,7 @@ interface FormData {
 
 export const Register = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Partial<FormData> & { confirmPassword?: string }>({});
@@ -88,9 +89,9 @@ export const Register = () => {
 
     try {
       const res = await axios.post('http://localhost:5000/api/auth/register', formData);
-      toast.success(res.data.message || t('registered_successfully'));
+      showToast('success', res.data.message || t('registered_successfully'));
     } catch (err: any) {
-      toast.error(err.response?.data?.message || t('something_went_wrong'));
+      showToast('error', err.response?.data?.message || t('something_went_wrong'));
     }
   };
 

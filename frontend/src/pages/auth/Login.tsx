@@ -2,11 +2,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { useToast } from '../../components/ToastContainer';
 import axios from 'axios';
 
 export const Login = () => {
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,11 +44,12 @@ export const Login = () => {
       });
 
       localStorage.setItem('token', res.data.token);
-      toast.success("Login Successful");
+      localStorage.setItem('userEmail', email);
+      showToast('success', t('login_success') || 'Login Successful');
       navigate('/');
     } catch (err: any) {
       console.error(err);
-      toast.error(err.response?.data?.message || t('something_went_wrong'));
+      showToast('error', err.response?.data?.message || t('something_went_wrong'));
     }
   };
 

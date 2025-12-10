@@ -9,6 +9,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const translations = {
   en: {
@@ -61,38 +62,60 @@ const translations = {
   },
 };
 
-const recentActivities = [
-  {
-    id: 1,
-    vehicleNo: 'ABC-1234',
-    action: 'Registration Approved',
-    time: '2 hours ago',
-  },
-  {
-    id: 2,
-    vehicleNo: 'XYZ-5678',
-    action: 'Transfer Request Submitted',
-    time: '4 hours ago',
-  },
-  {
-    id: 3,
-    vehicleNo: 'DEF-9012',
-    action: 'Documents Verified',
-    time: '6 hours ago',
-  },
-];
+import { useEffect, useState } from 'react';
 
 export const Dashboard = () => {
   const { language, isDarkMode } = useStore();
+  const [stats, setStats] = useState([
+    { icon: Car, label: 'total', value: '0' },
+    { icon: Clock, label: 'pending', value: '0' },
+    { icon: RefreshCw, label: 'transfer', value: '0' },
+    { icon: CheckCircle, label: 'approved', value: '0' },
+  ]);
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { icon: Car, label: 'total', value: '156' },
-    { icon: Clock, label: 'pending', value: '23' },
-    { icon: RefreshCw, label: 'transfer', value: '12' },
-    { icon: CheckCircle, label: 'approved', value: '89' },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch users (for demo, use as total users/vehicles)
+        const usersRes = await axios.get('http://localhost:5000/api/auth/users');
+        const users = Array.isArray(usersRes.data) ? usersRes.data : [];
+        
+        // Set all stats to 0 if no data
+        setStats([
+          { icon: Car, label: 'total', value: String(users.length || 0) },
+          { icon: Clock, label: 'pending', value: '0' },
+          { icon: RefreshCw, label: 'transfer', value: '0' },
+          { icon: CheckCircle, label: 'approved', value: '0' },
+        ]);
+        
+        // For demo, use users as recent activity
+        setRecentActivities(
+          users.slice(0, 5).map((user: any, idx: number) => ({
+            id: user._id || idx,
+            vehicleNo: user.nationalId || 'N/A',
+            action: user.fullName,
+            time: user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A',
+          }))
+        );
+      } catch (err) {
+        // Show 0s on error instead of '!'
+        setStats([
+          { icon: Car, label: 'total', value: '0' },
+          { icon: Clock, label: 'pending', value: '0' },
+          { icon: RefreshCw, label: 'transfer', value: '0' },
+          { icon: CheckCircle, label: 'approved', value: '0' },
+        ]);
+        setRecentActivities([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+}, []);
 
-  const quickActions = [
+const quickActions = [
     { icon: PlusCircle, label: 'register', path: '/add-vehicle' },
     { icon: RefreshCw, label: 'transfer', path: '/transfer' },
     { icon: AlertCircle, label: 'status', path: '/status' },
@@ -157,22 +180,30 @@ export const Dashboard = () => {
         <h2 className="mb-4 text-xl font-semibold">
           {translations[language].recentActivity}
         </h2>
-        <div className="space-y-4">
-          {recentActivities.map((activity) => (
-            <div
-              key={activity.id}
-              className={`flex items-center justify-between rounded-lg p-4 ${
-                isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
-              }`}
-            >
-              <div>
-                <p className="font-medium">{activity.vehicleNo}</p>
-                <p className="text-sm opacity-70">{activity.action}</p>
-              </div>
-              <p className="text-sm opacity-70">{activity.time}</p>
-            </div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-4">Loading...</div>
+        ) : (
+          <div className="space-y-4">
+            {recentActivities.length === 0 ? (
+              <div className="text-center py-4 opacity-70">No recent activity found.</div>
+            ) : (
+              recentActivities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className={`flex items-center justify-between rounded-lg p-4 ${
+                    isDarkMode ? 'bg-gray-700' : 'bg-gray-50'
+                  }`}
+                >
+                  <div>
+                    <p className="font-medium">{activity.vehicleNo}</p>
+                    <p className="text-sm opacity-70">{activity.action}</p>
+                  </div>
+                  <p className="text-sm opacity-70">{activity.time}</p>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

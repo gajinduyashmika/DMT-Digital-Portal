@@ -164,6 +164,22 @@ export const ta = {
   password_hint: "குறைந்தது 8 எழுத்துகள் இருக்க வேண்டும்",
   confirm_password_hint: "உறுதிப்படுத்த உங்கள் கடவுச்சொல்லை மீண்டும் உள்ளிடவும்",
   registered_successfully: "வெற்றிகரமாக பதிவு செய்யப்பட்டது",
-  something_went_wrong: "ஏதோ தவறு நடந்துள்ளது"
+  something_went_wrong: "ஏதோ தவறு நடந்துள்ளது",
+  login_success: "வெற்றிகரமாக உள்நுழைந்தது",
+
+  // Dashboard & Auth
+  go_to_dashboard: "டாஷ்போர்டுக்கு செல்லவும்",
+  logout: "வெளியேறு",
+  confirm_logout: "வெளியேறுதலை உறுதிப்படுத்தவும்",
+  logout_message: "நீங்கள் வெளியேற விரும்புகிறீர்களா? உங்கள் டாஷ்போர்டை அணுக மீண்டும் உள்நுழைய வேண்டும்.",
+  cancel: "ரத்து செய்யவும்",
+  logged_out_successfully: "வெற்றிகரமாக வெளியேறியது",
+  please_login_dashboard: "டாஷ்போர்டை அணுக உள்நுழையவும்",
+
+  // Toast notifications
+  toast_success_title: "வெற்றி",
+  toast_error_title: "பிழை",
+  toast_info_title: "தகவல்",
+  toast_warning_title: "எச்சரிக்கை"
   };
   

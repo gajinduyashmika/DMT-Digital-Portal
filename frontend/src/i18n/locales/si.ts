@@ -167,5 +167,21 @@ export const si = {
   password_hint: "අක්ෂර 8ක් හෝ වැඩි දිගක් විය යුතුය",
   confirm_password_hint: "තහවුරු කිරීම සඳහා ඔබේ මුරපදය නැවත ඇතුළත් කරන්න",
   registered_successfully: "සාර්ථකව ලියාපදිංචි කරන ලදි",
-  something_went_wrong: "යම් දෝෂයක් සිදු විය"
+  something_went_wrong: "යම් දෝෂයක් සිදු විය",
+  login_success: "සාර්ථකව පිවිසුණි",
+
+  // Dashboard & Auth
+  go_to_dashboard: "උපකරණ පුවරුවට යන්න",
+  logout: "ඉවත් වන්න",
+  confirm_logout: "ඉවත්වීම තහවුරු කරන්න",
+  logout_message: "ඔබට ඉවත් වීමට අවශ්‍ය බව විශ්වාසද? ඔබගේ උපකරණ පුවරුවට ප්‍රවේශ වීමට නැවත පිවිසිය යුතුය.",
+  cancel: "අවලංගු කරන්න",
+  logged_out_successfully: "සාර්ථකව ඉවත් විය",
+  please_login_dashboard: "කරුණාකර උපකරණ පුවරුවට ප්‍රවේශ වීමට පිවිසෙන්න",
+
+  // Toast notifications
+  toast_success_title: "සාර්ථකයි",
+  toast_error_title: "දෝෂයක්",
+  toast_info_title: "තොරතුරු",
+  toast_warning_title: "අවවාදයයි"
 };
