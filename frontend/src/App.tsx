@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, Outlet } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import './i18n/i18n'; // If needed for internationalization
 import { ToastProvider } from './components/ToastContainer';
+import { useStore } from './store/useStore';
 
 // Import Layouts and Components
 import { Footer } from './components/Footer';
@@ -31,10 +32,21 @@ import { NotFound } from './pages/landing/NotFound';
 
 
 const App: React.FC = () => {
+  const { isDarkMode } = useStore();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   return (
     <ToastProvider>
       <Router>
-        <div className="min-h-screen flex flex-col">
+        <div className={`min-h-screen flex flex-col ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
           <Toaster 
             position="top-right" 
             toastOptions={{
@@ -47,7 +59,7 @@ const App: React.FC = () => {
           {/* Dashboard Layout Route (Sidebar, Dashboard TopBar) */}
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/add-vehicle" element={<RegisterVehicle />} />
+            <Route path="/register-vehicle" element={<RegisterVehicle />} />
             <Route path="/transfer" element={<TransferVehicle />} />
             <Route path="/my-vehicles" element={<MyVehicles />} />
             <Route path="/status" element={<ApplicationStatus />} />
@@ -97,15 +109,8 @@ const DashboardLayout: React.FC = () => {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopBarDashboard />
-        <main className="flex-1 overflow-auto p-6">
-          <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/add-vehicle" element={<RegisterVehicle />} />
-            <Route path="/transfer" element={<TransferVehicle />} />
-            <Route path="/my-vehicles" element={<MyVehicles />} />
-            <Route path="/status" element={<ApplicationStatus />} />
-            <Route path="/settings" element={<Settings />} />
-          </Routes>
+        <main className="flex-1 overflow-auto p-6 bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+          <Outlet />
         </main>
       </div>
       <ChatWidget />
@@ -115,11 +120,12 @@ const DashboardLayout: React.FC = () => {
 
 // Auth Layout
 const AuthLayout: React.FC = () => {
+  const { isDarkMode } = useStore();
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
       <MainTopBar />
             <Navigation />
-      <main className="flex-1 overflow-auto p-6">
+      <main className="flex-1 overflow-auto p-6 bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -131,11 +137,12 @@ const AuthLayout: React.FC = () => {
 
 // Landing Layout
 const LandingLayout: React.FC = () => {
+  const { isDarkMode } = useStore();
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
       <MainTopBar />
       <Navigation />
-      <main className="flex-1 overflow-auto p-6">
+      <main className="flex-1 overflow-auto p-6 bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<AboutUs />} />

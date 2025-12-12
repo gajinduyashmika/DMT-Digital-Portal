@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Globe, User, Moon, Sun, LogOut, Settings } from 'lucide-react';
+import axios from 'axios';
 import { useStore } from '../store/useStore';
 
 const languages = [
@@ -10,11 +12,38 @@ const languages = [
 
 export const TopBarDashboard = () => {
   const { language, setLanguage, isDarkMode, setDarkMode } = useStore();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [profileName, setProfileName] = useState('User');
+  const [avatarUrl, setAvatarUrl] = useState('https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg');
 
-  // Get the username from localStorage
-  const username = localStorage.getItem('username') || 'User';
+  // Load user profile (name + avatar) from backend using stored email
+  useEffect(() => {
+    const email = localStorage.getItem('userEmail');
+    if (!email) return;
+
+    const fetchProfile = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/auth/user/${email}`);
+        const { fullName, profilePicture } = res.data;
+        if (fullName) {
+          setProfileName(fullName);
+          localStorage.setItem('username', fullName);
+        }
+        if (profilePicture) {
+          setAvatarUrl(profilePicture);
+        }
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+        // fallback to any cached username
+        const cachedName = localStorage.getItem('username');
+        if (cachedName) setProfileName(cachedName);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const notifications = [
     { id: 1, text: 'Your vehicle registration was approved', time: '5m ago' },
@@ -93,12 +122,16 @@ export const TopBarDashboard = () => {
             }`}
           >
             <img
-              src="https://bsmedia.business-standard.com/_media/bs/img/about-page/thumb/464_464/1649933026.jpg"
+              src={avatarUrl}
               alt="User"
               className="h-8 w-8 rounded-full object-cover"
+              onError={(e) => {
+                // ensure a fallback avatar if broken image
+                (e.currentTarget as HTMLImageElement).src = 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg';
+              }}
             />
-            <span className="text-sm font-medium">{username}</span>
-            <User className="h-4 w-4 opacity-70" />
+            <span className="text-sm font-medium">{profileName}</span>
+            
           </button>
 
           {showProfile && (
@@ -110,16 +143,21 @@ export const TopBarDashboard = () => {
               <div className="p-2">
                 <button className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm ${
                   isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-                }`}>
+                }`} onClick={() => navigate('/settings')}>
                   <Settings size={16} />
                   <span>Settings</span>
                 </button>
                 <button className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-500 ${
                   isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
                 }`} onClick={() => {
+                  const confirmed = window.confirm('Are you sure you want to logout?');
+                  if (!confirmed) return;
                   localStorage.removeItem('token');
                   localStorage.removeItem('username');
-                  window.location.href = '/login'; // Redirect to login
+                  localStorage.removeItem('userEmail');
+                  localStorage.removeItem('registerVehicleFormData');
+                  localStorage.removeItem('userHasSeenLandingScreen');
+                  navigate('/login');
                 }}>
                   <LogOut size={16} />
                   <span>Logout</span>

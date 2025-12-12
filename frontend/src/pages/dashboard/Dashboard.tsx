@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../../store/useStore';
 import {
   Car,
@@ -62,8 +62,6 @@ const translations = {
   },
 };
 
-import { useEffect, useState } from 'react';
-
 export const Dashboard = () => {
   const { language, isDarkMode } = useStore();
   const [stats, setStats] = useState([
@@ -78,25 +76,35 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Fetch users (for demo, use as total users/vehicles)
-        const usersRes = await axios.get('http://localhost:5000/api/auth/users');
-        const users = Array.isArray(usersRes.data) ? usersRes.data : [];
-        
-        // Set all stats to 0 if no data
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+          throw new Error('No user email found');
+        }
+
+        // Fetch user's vehicles
+        const vehiclesResponse = await axios.get(`http://localhost:5000/api/vehicles/owner/${userEmail}`);
+        const vehicles = Array.isArray(vehiclesResponse.data) ? vehiclesResponse.data : [];
+
+        // Calculate stats from vehicles
+        const totalVehicles = vehicles.length;
+        const pendingCount = vehicles.filter((v: any) => v.status === 'Pending').length;
+        const transferCount = vehicles.filter((v: any) => v.transferStatus === 'Pending Transfer').length;
+        const approvedCount = vehicles.filter((v: any) => v.status === 'Approved').length;
+
         setStats([
-          { icon: Car, label: 'total', value: String(users.length || 0) },
-          { icon: Clock, label: 'pending', value: '0' },
-          { icon: RefreshCw, label: 'transfer', value: '0' },
-          { icon: CheckCircle, label: 'approved', value: '0' },
+          { icon: Car, label: 'total', value: totalVehicles.toString() },
+          { icon: Clock, label: 'pending', value: pendingCount.toString() },
+          { icon: RefreshCw, label: 'transfer', value: transferCount.toString() },
+          { icon: CheckCircle, label: 'approved', value: approvedCount.toString() },
         ]);
-        
-        // For demo, use users as recent activity
+
+        // Set recent activities from vehicles
         setRecentActivities(
-          users.slice(0, 5).map((user: any, idx: number) => ({
-            id: user._id || idx,
-            vehicleNo: user.nationalId || 'N/A',
-            action: user.fullName,
-            time: user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A',
+          vehicles.slice(0, 5).map((vehicle: any) => ({
+            id: vehicle._id,
+            vehicleNo: vehicle.regNumber,
+            action: `${vehicle.makeModel} - ${vehicle.status}`,
+            time: new Date(vehicle.createdAt).toLocaleString(),
           }))
         );
       } catch (err) {

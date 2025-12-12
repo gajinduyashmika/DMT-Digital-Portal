@@ -18,7 +18,7 @@ import logo from '../assets/corner_logo.png';
 const translations = {
   en: {
     dashboard: 'Dashboard',
-    addVehicle: 'Add New Vehicle',
+    addVehicle: 'Register a Vehicle',
     myVehicles: 'My Vehicles',
     transfer: 'Transfer Ownership',
     status: 'Application Status',
@@ -27,7 +27,7 @@ const translations = {
   },
   si: {
     dashboard: 'උපකරණ පුවරුව',
-    addVehicle: 'නව වාහනයක් එකතු කරන්න',
+    addVehicle: 'වාහනයක් ලියාපදිංචි කරන්න',
     myVehicles: 'මගේ වාහන',
     transfer: 'අයිතිය මාරු කිරීම',
     status: 'අයදුම්පත් තත්ත්වය',
@@ -36,7 +36,7 @@ const translations = {
   },
   ta: {
     dashboard: 'டாஷ்போர்டு',
-    addVehicle: 'புதிய வாகனம் சேர்க்க',
+    addVehicle: 'வாகனத்தை பதிவு செய்க',
     myVehicles: 'எனது வாகனங்கள்',
     transfer: 'உரிமை மாற்றம்',
     status: 'விண்ணப்ப நிலை',
@@ -50,7 +50,7 @@ type TranslationKey = keyof typeof translations.en;
 
 const navItems = [
   { icon: Home, label: 'dashboard' as TranslationKey, path: '/dashboard' },
-  { icon: PlusCircle, label: 'addVehicle' as TranslationKey, path: '/add-vehicle' },
+  { icon: PlusCircle, label: 'addVehicle' as TranslationKey, path: '/register-vehicle' },
   { icon: Car, label: 'myVehicles' as TranslationKey, path: '/my-vehicles' },
   { icon: RefreshCw, label: 'transfer' as TranslationKey, path: '/transfer' },
   { icon: Inbox, label: 'status' as TranslationKey, path: '/status' },
