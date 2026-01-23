@@ -10,9 +10,10 @@ const ApplicationSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   emailAddress: { type: String, required: true },
   occupation: { type: String, default: '' },
-  
+
   // Vehicle Information
-  registrationNumber: { type: String, required: true, unique: true },
+  // Registration number is assigned by department after approval
+  registrationNumber: { type: String, default: null, unique: false },
   vehicleClass: { type: String, required: true },
   makeOfVehicle: { type: String, required: true },
   modelOfVehicle: { type: String, required: true },
@@ -23,12 +24,15 @@ const ApplicationSchema = new mongoose.Schema({
   fuelType: { type: String, required: true, enum: ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'LPG'] },
   engineCapacity: { type: String, default: '' },
   numberOfCylinders: { type: Number, default: 0 },
-  
+
   // Vehicle Details
   importedOrLocal: { type: String, enum: ['Imported', 'Local'], default: 'Local' },
   emissionStandard: { type: String, default: '' },
   noOfOwners: { type: Number, required: true, min: 1 },
-  
+
+  // Vehicle Image (stored as base64)
+  vehicleImage: { type: String, default: null },
+
   // Documents (stored as base64)
   documents: {
     nidCopy: { type: String, required: true },
@@ -37,19 +41,50 @@ const ApplicationSchema = new mongoose.Schema({
     emissionTest: { type: String, required: true },
     inspectionReport: { type: String, default: null },
   },
-  
+
   // Application Status
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     default: 'Pending',
-    enum: ['Pending', 'Approved', 'Rejected', 'Under Review']
+    enum: ['Pending', 'Approved', 'Rejected', 'Under Review', 'Cancelled']
   },
-  
-  // Admin Notes
+
+  // Payment Info
+  paymentReference: { type: String, required: true },
+  paymentAmount: { type: Number, required: true },
+  paymentStatus: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' },
+  vipRequested: { type: Boolean, default: false },
+  vipNumber: { type: String, default: null },
+  vipFee: { type: Number, default: 0 },
+
+  // Admin Review & Comments
   adminNotes: { type: String, default: '' },
+  adminComments: { type: String, default: '' }, // Comments for client to see
   reviewedBy: { type: String, default: null },
   reviewedAt: { type: Date, default: null },
-  
+  rejectionReason: { type: String, default: null },
+
+  // Detailed Field Review
+  reviewProgress: { type: Number, default: 0 }, // 0 to 100
+  fieldReviews: {
+    ownerDetails: {
+      status: { type: String, enum: ['Pending', 'Correct', 'Incorrect'], default: 'Pending' },
+      comment: { type: String, default: '' }
+    },
+    vehicleDetails: {
+      status: { type: String, enum: ['Pending', 'Correct', 'Incorrect'], default: 'Pending' },
+      comment: { type: String, default: '' }
+    },
+    documents: {
+      status: { type: String, enum: ['Pending', 'Correct', 'Incorrect'], default: 'Pending' },
+      comment: { type: String, default: '' }
+    },
+    payment: {
+      status: { type: String, enum: ['Pending', 'Correct', 'Incorrect'], default: 'Pending' },
+      comment: { type: String, default: '' }
+    }
+  },
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Application', ApplicationSchema);

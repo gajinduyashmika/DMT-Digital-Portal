@@ -8,6 +8,13 @@ const UserSchema = new mongoose.Schema({
   address: { type: String, required: true },
   password: { type: String, required: true },
   profilePicture: { type: String, default: 'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg' },
+  status: { type: String, enum: ['active', 'blocked'], default: 'active' },
+  loginHistory: [{
+    ip: String,
+    device: String,
+    date: { type: Date, default: Date.now }
+  }],
+  tokenVersion: { type: Number, default: 0 },
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.models.User || mongoose.model('User', UserSchema);
