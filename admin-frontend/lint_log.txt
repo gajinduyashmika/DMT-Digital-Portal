@@ -1,0 +1,72 @@
+﻿
+> dmt-admin-portal@1.0.0 lint
+> eslint .
+
+
+D:\Full\admin-frontend\src\components\Announcements.tsx
+    5:3   error    'Filter' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+    6:3   error    'Send' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+    9:3   error    'Eye' is defined but never used                                                                                        @typescript-eslint/no-unused-vars
+   12:3   error    'AlertTriangle' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+   13:3   error    'Edit' is defined but never used                                                                                       @typescript-eslint/no-unused-vars
+   64:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+   76:6   warning  React Hook useEffect has a missing dependency: 'fetchAnnouncements'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  127:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  146:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  166:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  386:53  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+
+D:\Full\admin-frontend\src\components\AuditLogs.tsx
+   4:3   error    'Filter' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  10:3   error    'Shield' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+  12:3   error    'Settings' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  16:3   error    'Clock' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+  35:28  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+  59:19  error    Unexpected any. Specify a different type                                                                           @typescript-eslint/no-explicit-any
+  71:6   warning  React Hook useEffect has a missing dependency: 'fetchAuditLogs'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+D:\Full\admin-frontend\src\components\LiveChat.tsx
+   46:18  error    'user' is assigned a value but never used                                                                        @typescript-eslint/no-unused-vars
+   72:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+   90:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+  102:6   warning  React Hook useEffect has a missing dependency: 'fetchTickets'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  174:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+  198:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+  219:19  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+
+D:\Full\admin-frontend\src\components\NotificationManagement.tsx
+    5:3   error    'Filter' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+    9:3   error    'Users' is defined but never used                                                                                      @typescript-eslint/no-unused-vars
+   19:3   error    'Paperclip' is defined but never used                                                                                  @typescript-eslint/no-unused-vars
+  103:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  115:6   warning  React Hook useEffect has a missing dependency: 'fetchNotifications'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  201:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  219:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  237:19  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+  583:53  error    Unexpected any. Specify a different type                                                                               @typescript-eslint/no-explicit-any
+
+D:\Full\admin-frontend\src\components\StaffManagement.tsx
+    5:3   error    'Filter' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   10:3   error    'Edit' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+   11:3   error    'MapPin' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   12:3   error    'Calendar' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+   14:3   error    'Phone' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+   16:3   error    'Activity' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+   17:3   error    'Clock' is defined but never used                                                                              @typescript-eslint/no-unused-vars
+   19:3   error    'Download' is defined but never used                                                                           @typescript-eslint/no-unused-vars
+   20:3   error    'AlertTriangle' is defined but never used                                                                      @typescript-eslint/no-unused-vars
+   21:3   error    'CheckCircle' is defined but never used                                                                        @typescript-eslint/no-unused-vars
+   61:24  error    'setShowEditForm' is assigned a value but never used                                                           @typescript-eslint/no-unused-vars
+   91:19  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  107:6   warning  React Hook useEffect has a missing dependency: 'fetchStaff'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  155:19  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  179:19  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  199:19  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+  207:9   error    'handleDeleteStaff' is assigned a value but never used                                                         @typescript-eslint/no-unused-vars
+  221:19  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+
+D:\Full\admin-frontend\src\types\index.ts
+  44:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 53 problems (48 errors, 5 warnings)
+
