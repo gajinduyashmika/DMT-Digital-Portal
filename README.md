@@ -1,109 +1,165 @@
-# DMT Digital Portal
+# DMT Digital Portal - Department of Motor Traffic Digitization
 
-A comprehensive digital platform for the Department of Motor Traffic (DMT) to streamline vehicle registration, ownership transfers, and citizen services. This repository contains the Frontend, Admin Panel, and Backend API.
+## 📋 Project Overview
 
-## 🚀 Features
+The **DMT Digital Portal** is a state-of-the-art web platform developed for the Department of Motor Traffic (DMT). It aims to completely digitize the vehicle registration and ownership transfer process, reducing physical paperwork, wait times, and administrative burden. The system provides two distinct experiences:
+1.  **Citizen Portal**: For users to register vehicles, request transfers, and track status.
+2.  **Admin Portal**: For DMT officials to review applications, verify documents, and manage system operations.
 
-### For Citizens (User Portal)
-*   **Vehicle Registration**: Online application submission with document uploads.
-*   **Ownership Transfers**: Initiate and track transfer requests.
-*   **Dashboard**: Real-time status tracking of all vehicles and applications.
-*   **Notifications**: Personalized alerts for application updates and transfer approvals.
-*   **Announcements**: System-wide updates and news pinned to the dashboard.
-*   **Live Chat**: Direct communication with DMT support.
-*   **Visual Appeal**: Modern, responsive design with dark mode support.
+## ✨ Key Features
 
-### For Administrators (Admin Portal)
-*   **Dashboard**: High-level overview of system stats (Vehicles, Users, Pending Apps).
-*   **Application Review**: Verify documents, approve/reject requests with comments.
-*   **Ownership Management**: Oversee and approve transfer of ownership.
-*   **User Management**: View user details, vehicle history, and manage access.
-*   **Announcements**: Create, pin, and manage public announcements.
-*   **Audit Logs**: Comprehensive logs of all admin actions for accountability.
-*   **OCR Integration**: (Experimental) Automated document verification features.
+### 🚗 For Citizens (User Portal)
+*   **End-to-End Online Registration**: Submit vehicle details, upload documents (NIC, Invoice, Insurance), and pay fees online.
+*   **Ownership Transfers**: Initiate transfer requests, which the seller can approve/reject via their own dashboard.
+*   **Real-time Dashboard**: Track the status of all your applications and vehicles (Pending, Under Review, Approved).
+*   **Notification Center**: Receive instant alerts for application updates, transfer requests, and general announcements.
+*   **Pinned Announcements**: Important public service announcements are highlighted at the top of the dashboard.
+*   **Live Chat**: Direct support channel to communicate with DMT administration.
+*   **VIP Number Request**: Option to check availability and request special/VIP vehicle registration numbers.
+
+### 🛡️ For Administrators (Admin Portal)
+*   **Operational Dashboard**: Real-time statistics on total vehicles, pending applications, active users, and system health.
+*   **Application Management**: Detailed review interface for new registrations. View documents side-by-side, verify info, and correct/reject with comments.
+*   **Ownership Transfer Oversight**: Review and final approval workflow for vehicle transfers between citizens.
+*   **User Management**: centralized view of all registered citizens, with the ability to block/unblock users.
+*   **Announcement Management**: Create, edit, and pin public announcements to the citizen dashboard.
+*   **Audit Logs**: Comprehensive, immutable logs of every action taken within the system for security and accountability.
+*   **Automated Verification**: Integrated AI/OCR tools to assist in verifying uploaded document authenticity (Proof of Concept).
 
 ## 🛠️ Technology Stack
 
-**Frontend (User & Admin)**
-*   **Framework**: React (Vite)
-*   **Styling**: Tailwind CSS, Lucide React (Icons)
-*   **State Management**: React Context / Custom Hooks
-*   **HTTP Client**: Axios
-
-**Backend**
-*   **Runtime**: Node.js
-*   **Framework**: Express.js
-*   **Database**: MongoDB (Mongoose ODM)
-*   **Authentication**: JWT (JSON Web Tokens)
-*   **AI Integration**: Google Generative AI (for intelligent features)
-*   **File Handling**: Multer (for document uploads)
+| Component | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Frontend** | **React.js (Vite)** | High performance, component-based architecture. |
+| **Styling** | **Tailwind CSS** | Rapid UI development with a consistent, modern design system. |
+| **Icons** | **Lucide React** | Lightweight, consistent icon set. |
+| **Backend** | **Node.js + Express** | Scalable, event-driven RESTful API. |
+| **Database** | **MongoDB (Mongoose)** | Flexible schema for complex vehicle/application data. |
+| **Authentication** | **JWT (JSON Web Tokens)** | Stateless, secure user authentication. |
+| **AI Integration** | **Google Generative AI** | Used for intelligent features and document analysis. |
+| **File Storage** | **Multer / Local** | Handling document and image uploads. |
 
 ## 📂 Project Structure
 
 ```bash
 dmt-digital-portal/
-├── admin-frontend/     # Admin Dashboard (React + Vite)
-├── backend/            # API Server (Node.js + Express)
-└── frontend/           # User Portal (React + Vite)
+├── admin-frontend/     # Admin Dashboard Source
+│   ├── src/
+│   │   ├── components/ # Reusable UI components (Announcements, Dashboard, etc.)
+│   │   ├── contexts/   # AuthContext for state management
+│   │   └── pages/      # Route pages
+├── backend/            # REST API Server
+│   ├── models/         # Mongoose Schemas (User, Vehicle, Application, etc.)
+│   ├── routes/         # API Endpoints (Auth, Admin, Vehicles, etc.)
+│   └── middleware/     # Auth verification, upload handling
+└── frontend/           # Citizen Portal Source
+    ├── src/
+    │   ├── pages/      # Dashboard, Registration, Transfer pages
+    │   └── components/ # UI Elements
 ```
 
-## ⚙️ Prerequisites
+## ⚙️ Configuration & Environment Variables
 
-*   Node.js (v18 or higher)
-*   MongoDB (Local or Atlas connection string)
-*   npm or yarn
+This project requires environment variables to be set in the `backend` folder. Create a `.env` file in `dmt-digital-portal/backend/`:
 
-## 🚀 Installation & Setup
+```env
+# Server Configuration
+PORT=5000
+
+# Database Connection
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/dmt_db
+
+# Security
+JWT_SECRET=your_super_secret_jwt_key_here
+
+# AI Integration (Optional)
+GEMINI_API_KEY=your_google_gemini_api_key
+
+# Admin Setup (Initial Admin)
+ADMIN_EMAIL=admin@dmt.gov.lk
+```
+
+## 🚀 Installation & Run Guide
 
 ### 1. Backend Setup
+The backend is the heart of the application. It must be running for the frontends to work.
 
 ```bash
 cd backend
-npm install
-
-# Create a .env file based on the keys below
-# PORT=5000
-# MONGO_URI=your_mongodb_connection_string
-# JWT_SECRET=your_secret_key
-# GEMINI_API_KEY=your_google_ai_key
-# ADMIN_EMAIL=admin@dmt.gov.lk
-
-npm run dev
+npm install                 # Install dependencies
+npm run dev                 # Start server with Nodemon (auto-restart)
+# Server runs on http://localhost:5000
 ```
 
-### 2. User Frontend Setup
+### 2. User Frontend Setup (Citizen Portal)
 
 ```bash
 cd frontend
-npm install
-npm run dev
+npm install                 # Install dependencies
+npm run dev                 # Start Vite dev server
+# App runs on http://localhost:5173
 ```
 
-### 3. Admin Frontend Setup
+### 3. Admin Frontend Setup (Admin Portal)
 
 ```bash
 cd admin-frontend
-npm install
-npm run dev
+npm install                 # Install dependencies
+npm run dev                 # Start Vite dev server
+# App runs on http://localhost:5174
 ```
 
-## 📖 Usage
+## � API Documentation
 
-1.  **Access User Portal**: Open `http://localhost:5173` (default Vite port) to register/login as a citizen.
-2.  **Access Admin Portal**: Open `http://localhost:5174` (or allocated port) to login as an administrator.
-3.  **API**: The backend runs on `http://localhost:5000`.
+### Authentication (`/api/auth`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/register` | Register a new citizen account. |
+| `POST` | `/login` | Authenticate user and return JWT. |
+| `GET` | `/user/:email` | Get current user profile details. |
 
-## 🤝 Contributing
+### Vehicles (`/api/vehicles`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/owner/:email` | Get all vehicles owned by a specific user. |
+| `POST` | `/register` | Register an existing vehicle (Migration). |
+| `GET` | `/check-number/:num` | Check availability of a specific registration number. |
+| `POST` | `/public-search` | Publicly query vehicle status (Limited data). |
 
-1.  Fork the repository.
-2.  Create a feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+### Applications (`/api/applications`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | `/submit` | Submit a new vehicle registration application. |
+| `GET` | `/user/:email` | Get all applications for a user. |
+| `GET` | `/:id` | Get details of a specific application. |
+
+### Admin (`/api/admin`) - *Requires Admin Token*
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/stats` | Fetch aggregated dashboard statistics. |
+| `GET` | `/applications` | List all applications with filtering. |
+| `PUT` | `/applications/:id/approve` | Approve an application and generate vehicle record. |
+| `PUT` | `/applications/:id/reject` | Reject an application with comments. |
+| `GET` | `/users` | List all registered users. |
+| `PUT` | `/users/:id/block` | Block a user account. |
+
+### Announcements (`/api/announcements`)
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Fetch active announcements (supports `?target=all`). |
+| `POST` | `/` | Admin: Create a new announcement (supports pinning). |
+
+## 🤝 Contribution Workflow
+
+1.  **Fork** the repository to your GitHub account.
+2.  **Clone** your fork locally.
+3.  **Branch** for your feature: `git checkout -b feature/NewFeature`.
+4.  **Commit** your changes: `git commit -m 'Add NewFeature'`.
+5.  **Push** to your branch: `git push origin feature/NewFeature`.
+6.  Open a **Pull Request** on the main repository.
 
 ## 📄 License
-
-This project is licensed under the ISC License.
+This project is proprietary software developed for the Department of Motor Traffic. Unauthorized duplication or distribution is prohibited.
 
 ---
-*Built for the Department of Motor Traffic Digital Transformation Initiative.*
+*Generated by the DMT Digital Transformation Team.*
